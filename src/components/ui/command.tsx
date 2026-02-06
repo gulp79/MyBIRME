@@ -130,9 +130,17 @@ const CommandShortcut = ({
     {...props}
   />
 );
+CommandShortcut.displayName = "CommandShortcut";
 
 // ===== Exports =====
 export {
   Command,
   CommandDialog,
   CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandSeparator,
+  CommandItem,
+  CommandShortcut,
+};
