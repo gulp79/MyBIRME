@@ -29,9 +29,14 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
+      
+      - name: Install deps (attempt lock sync)
+        run: npm install --no-audit --no-fund
 
-      - name: Install deps (ci)
-        run: npm ci
+      - name: Verify clean install (optional)
+        run: |
+          rm -rf node_modules
+          npm ci
 
       - name: Typecheck (facoltativo)
         run: npm run typecheck --if-present
