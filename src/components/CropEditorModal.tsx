@@ -38,8 +38,8 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
       const rect = container.getBoundingClientRect();
       setContainerSize({ width: rect.width, height: rect.height });
     };
-
     updateSize();
+
     const resizeObserver = new ResizeObserver(updateSize);
     resizeObserver.observe(container);
     return () => resizeObserver.disconnect();
@@ -51,7 +51,6 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
     containerSize.height / image.originalHeight,
     1
   ) * 0.9; // 90% to add padding
-
   const displayImageWidth = image.originalWidth * displayScale;
   const displayImageHeight = image.originalHeight * displayScale;
   const imageOffsetX = (containerSize.width - displayImageWidth) / 2;
@@ -70,7 +69,7 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
 
     ctx.clearRect(0, 0, containerSize.width, containerSize.height);
 
-    // Draw checkerboard background for transparent images
+    // Checkerboard background
     const checkerSize = 10;
     for (let x = 0; x < containerSize.width; x += checkerSize) {
       for (let y = 0; y < containerSize.height; y += checkerSize) {
@@ -79,7 +78,7 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
       }
     }
 
-    // Draw image
+    // Image
     ctx.drawImage(
       image.bitmap,
       imageOffsetX,
@@ -88,7 +87,7 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
       displayImageHeight
     );
 
-    // Draw overlay outside crop
+    // Overlay outside crop
     const cropX = imageOffsetX + displayCrop.x * displayScale;
     const cropY = imageOffsetY + displayCrop.y * displayScale;
     const cropW = displayCrop.width * displayScale;
@@ -104,19 +103,17 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
     // Right
     ctx.fillRect(cropX + cropW, cropY, containerSize.width - cropX - cropW, cropH);
 
-    // Draw crop border
+    // Crop border
     ctx.strokeStyle = 'hsl(199, 89%, 48%)';
     ctx.lineWidth = 2;
     ctx.strokeRect(cropX, cropY, cropW, cropH);
 
-    // Draw rule of thirds
+    // Rule of thirds
     if (state.settings.showRuleOfThirds) {
       ctx.strokeStyle = 'rgba(14, 165, 233, 0.4)';
       ctx.lineWidth = 1;
-
       const thirdW = cropW / 3;
       const thirdH = cropH / 3;
-
       ctx.beginPath();
       ctx.moveTo(cropX + thirdW, cropY);
       ctx.lineTo(cropX + thirdW, cropY + cropH);
@@ -129,19 +126,17 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
       ctx.stroke();
     }
 
-    // Draw corner handles
+    // Corner handles
     const handleSize = 12;
     ctx.fillStyle = 'hsl(199, 89%, 48%)';
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 2;
-
     const corners = [
       { x: cropX, y: cropY },
       { x: cropX + cropW, y: cropY },
       { x: cropX, y: cropY + cropH },
       { x: cropX + cropW, y: cropY + cropH },
     ];
-
     corners.forEach(({ x, y }) => {
       ctx.beginPath();
       ctx.arc(x, y, handleSize / 2, 0, Math.PI * 2);
@@ -149,7 +144,7 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
       ctx.stroke();
     });
 
-    // Draw center crosshair
+    // Center crosshair
     ctx.strokeStyle = 'rgba(14, 165, 233, 0.6)';
     ctx.lineWidth = 1;
     ctx.setLineDash([4, 4]);
@@ -171,10 +166,8 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
-
     const deltaX = (e.clientX - dragStart.x) / displayImageWidth;
     const deltaY = (e.clientY - dragStart.y) / displayImageHeight;
-
     const newState = updateCenter(
       cropStartCenter.x - deltaX,
       cropStartCenter.y - deltaY
@@ -198,11 +191,9 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging || e.touches.length !== 1) return;
-
     const touch = e.touches[0];
     const deltaX = (touch.clientX - dragStart.x) / displayImageWidth;
     const deltaY = (touch.clientY - dragStart.y) / displayImageHeight;
-
     const newState = updateCenter(
       cropStartCenter.x - deltaX,
       cropStartCenter.y - deltaY
@@ -223,7 +214,13 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
     setLocalCropState(newState);
   }, [localCropState, updateScale]);
 
-  // Keyboard shortcuts
+  // ✅ Dichiarata PRIMA, memoizzata e riutilizzata
+  const handleApply = useCallback(() => {
+    updateCropState(image.id, localCropState);
+    onClose();
+  }, [image.id, localCropState, updateCropState, onClose]);
+
+  // Keyboard shortcuts (usa handleApply nelle deps)
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const step = e.shiftKey ? 0.05 : 0.01;
     const zoomStep = e.shiftKey ? 0.2 : 0.1;
@@ -268,33 +265,23 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
         onClose();
         break;
     }
-  }, [localCropState, updateCenter, updateScale, reset, onClose]);
-
-  const handleApply = () => {
-    updateCropState(image.id, localCropState);
-    onClose();
-  };
+  }, [localCropState, updateCenter, updateScale, reset, handleApply, onClose]);
 
   const handleReset = () => {
     setLocalCropState(reset());
   };
-
   const handleCenter = () => {
     setLocalCropState(center());
   };
-
   const handleFit = () => {
     setLocalCropState(fit());
   };
-
   const handleZoomIn = () => {
     setLocalCropState(updateScale(localCropState.scale + 0.1));
   };
-
   const handleZoomOut = () => {
     setLocalCropState(updateScale(localCropState.scale - 0.1));
   };
-
   const handleSliderChange = (value: number[]) => {
     setLocalCropState(updateScale(value[0]));
   };
@@ -389,7 +376,7 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
               <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">↑↓←→</kbd> Move
             </span>
             <span>
-              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">+/-</kbd> Zoom
+              <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">+/−</kbd> Zoom
             </span>
             <span>
               <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px]">R</kbd> Reset
