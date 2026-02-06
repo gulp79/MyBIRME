@@ -8,7 +8,7 @@ updates:
       day: "monday"
       time: "08:00"
       timezone: "Europe/Rome"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 20
     # Riduci il numero di PR raggruppando minor/patch
     groups:
       npm-minor-patch-prod:
@@ -28,7 +28,7 @@ updates:
       day: "monday"
       time: "08:00"
       timezone: "Europe/Rome"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 20
     groups:
       gha-all:
         patterns: ["*"]
