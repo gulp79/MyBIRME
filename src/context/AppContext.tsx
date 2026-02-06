@@ -190,7 +190,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Use a ref to always access the latest images without stale closures
   const imagesRef = useRef(state.images);
-  imagesRef.current = state.images;
+  // Aggiorna la ref SOLO fuori dal render
+  useEffect(() => {
+    imagesRef.current = state.images;
+  }, [state.images]);
 
   const runSmartCropForImage = useCallback(async (id: string, imageOverride?: ImageFile) => {
     const image = imageOverride ?? imagesRef.current.find(img => img.id === id);
