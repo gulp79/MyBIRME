@@ -1,0 +1,34 @@
+version: 2
+updates:
+  # Aggiorna dipendenze npm (package.json / package-lock.json)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 10
+    # Riduci il numero di PR raggruppando minor/patch
+    groups:
+      npm-minor-patch-prod:
+        dependency-type: "production"
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+      npm-minor-patch-dev:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
+        patterns: ["*"]
+
+  # Mantieni aggiornate le GitHub Actions nei workflow
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 10
+    groups:
+      gha-all:
+        patterns: ["*"]
