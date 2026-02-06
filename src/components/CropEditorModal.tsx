@@ -261,14 +261,15 @@ export function CropEditorModal({ image, onClose }: CropEditorModalProps) {
         break;
       case 'Enter':
         e.preventDefault();
-        handleApply();
+        updateCropState(image.id, localCropState);
+        onClose();
         break;
       case 'Escape':
         e.preventDefault();
         onClose();
         break;
     }
-  }, [localCropState, updateCenter, updateScale, reset, onClose]);
+  }, [localCropState, updateCenter, updateScale, reset, onClose, image.id, updateCropState]);
 
   const handleApply = () => {
     updateCropState(image.id, localCropState);
